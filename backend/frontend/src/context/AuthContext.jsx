@@ -3,6 +3,9 @@ import axios from 'axios';
 
 const AuthContext = createContext(null);
 
+// ✅ 1. Добавили переменную с адресом вашего бэкенда на Railway
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token'));
@@ -18,7 +21,8 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   const login = async (email, password) => {
-    const res = await axios.post('/api/auth/login', { email, password });
+    // ✅ 2. Изменили запрос: теперь он использует полный URL на Railway
+    const res = await axios.post(`${API_URL}/api/auth/login`, { email, password });
     const { token: newToken, user: userData } = res.data;
     setToken(newToken);
     setUser(userData);
