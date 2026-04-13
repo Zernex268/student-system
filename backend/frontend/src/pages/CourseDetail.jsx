@@ -1,4 +1,3 @@
-// backend/frontend/src/pages/CourseDetail.jsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
@@ -10,7 +9,7 @@ export default function CourseDetail() {
   const [course, setCourse] = useState(null);
   const [topics, setTopics] = useState([]);
   const [lessons, setLessons] = useState({});
-  const [topicFiles, setTopicFiles] = useState({}); // Файлы тем
+  const [topicFiles, setTopicFiles] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,12 +24,10 @@ export default function CourseDetail() {
       const topicsRes = await axios.get(`/api/topics/course/${courseId}`);
       setTopics(topicsRes.data);
 
-      // Загружаем файлы для каждой темы
       const filesMap = {};
       for (const topic of topicsRes.data) {
         try {
           const filesRes = await axios.get(`/api/topics/${topic.id}/files`);
-          // Нормализуем данные
           filesMap[topic.id] = (filesRes.data || []).map(file => ({
             id: file.id,
             name: file.file_name || file.name || 'Без названия',
@@ -40,10 +37,7 @@ export default function CourseDetail() {
             size: file.file_size || file.size || 0,
             uploader_name: file.uploader_name
           }));
-        } catch (err) {
-          console.warn(`Не удалось загрузить файлы темы ${topic.id}:`, err);
-          filesMap[topic.id] = [];
-        }
+        } catch (err) { filesMap[topic.id] = []; }
       }
       setTopicFiles(filesMap);
 
@@ -60,7 +54,6 @@ export default function CourseDetail() {
     }
   };
 
-  // Форматирование размера файла
   const formatSize = (bytes) => {
     if (!bytes) return '';
     const k = 1024;
@@ -73,7 +66,7 @@ export default function CourseDetail() {
   if (!course) return <div className="alert alert-danger">Курс не найден</div>;
 
   return (
-    <div>
+    <div className="container-fluid">
       <nav aria-label="breadcrumb" className="mb-3">
         <ol className="breadcrumb">
           <li className="breadcrumb-item"><Link to="/courses">Курсы</Link></li>
@@ -81,16 +74,12 @@ export default function CourseDetail() {
         </ol>
       </nav>
 
-      <div className="card mb-4">
-        <div className="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-          <span className="flex-grow-1 text-truncate" style={{ minWidth: 0 }}>
-            {course.title}
-          </span>
+      <div className="card mb-4 shadow-sm">
+        {/* Заголовок курса с кнопкой */}
+        <div className="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+          <h4 className="mb-0 flex-grow-1 text-break">{course.title}</h4>
           {user.role === 'admin' && (
-            <Link
-              to={`/admin/submissions/${courseId}`}
-              className="btn btn-primary btn-sm flex-shrink-0"
-            >
+            <Link to={`/admin/submissions/${courseId}`} className="btn btn-primary btn-sm flex-shrink-0">
               <i className="bi bi-clipboard-check me-1"></i> Проверить ответы
             </Link>
           )}
@@ -103,7 +92,7 @@ export default function CourseDetail() {
         </div>
       </div>
 
-      <h5 className="fw-bold mb-3" style={{ color: '#486188' }}>
+      <h5 className="fw-bold mb-3 text-primary">
         <i className="bi bi-layers-fill me-2"></i> Содержание курса
       </h5>
 
@@ -111,73 +100,65 @@ export default function CourseDetail() {
         <div className="card"><div className="card-body text-muted text-center">Тем пока нет</div></div>
       ) : (
         topics.map(topic => (
-          <div key={topic.id} className="topic-section mb-4">
-            <h6 className="fw-bold" style={{ color: '#486188' }}>
-              <i className="bi bi-folder2-open me-2"></i>{topic.title}
-            </h6>
-            {topic.description && <p className="text-muted small">{topic.description}</p>}
+          <div key={topic.id} className="card mb-3 border-start border-primary border-4">
+            <div className="card-body">
+              <h6 className="fw-bold mb-2 text-break">
+                <i className="bi bi-folder2-open me-2 text-primary"></i> {topic.title}
+              </h6>
+              {topic.description && <p className="text-muted small mb-3">{topic.description}</p>}
 
-            {/* === ФАЙЛЫ ТЕМЫ === */}
-            {topicFiles[topic.id] && topicFiles[topic.id].length > 0 && (
-              <div className="mb-3 p-2" style={{ 
-                background: 'rgba(72, 97, 136, 0.06)', 
-                border: '1px solid var(--border)',
-                borderLeft: '3px solid #486188'
-              }}>
-                <small className="text-muted d-block mb-2 fw-bold">
-                  <i className="bi bi-paperclip me-1"></i>Файлы темы:
-                </small>
-                {topicFiles[topic.id].map((file, index) => (
-                  <div key={file.id || index} className="small mb-2 d-flex align-items-center justify-content-between flex-wrap gap-2">
-                    <a 
-                      href={file.url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-decoration-none d-flex align-items-center flex-grow-1"
-                      style={{ color: '#486188', fontWeight: 500, minWidth: 0 }}
-                      download={file.name}
-                    >
-                      <i className="bi bi-file-earmark me-2 flex-shrink-0"></i>
-                      <span className="text-truncate">{file.name}</span>
-                    </a>
-                    <div className="d-flex align-items-center gap-2 flex-shrink-0">
-                      <small className="text-muted">
-                        {formatSize(file.size)}
-                      </small>
-                      <a
-                        href={file.url}
+              {/* Файлы темы */}
+              {topicFiles[topic.id] && topicFiles[topic.id].length > 0 && (
+                <div className="mb-3 p-2 bg-light rounded">
+                  <small className="text-muted d-block mb-2 fw-bold">
+                    <i className="bi bi-paperclip me-1"></i> Файлы темы:
+                  </small>
+                  {topicFiles[topic.id].map((file) => (
+                    <div key={file.id} className="d-flex flex-wrap justify-content-between align-items-center py-1 border-bottom">
+                      <a 
+                        href={file.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-decoration-none text-primary me-2 d-flex align-items-center"
                         download={file.name}
-                        className="btn btn-sm btn-outline-primary py-0 px-2"
-                        title="Скачать"
-                        style={{ fontSize: '0.75rem' }}
                       >
-                        <i className="bi bi-download"></i>
+                        <i className="bi bi-file-earmark me-2"></i>
+                        <span className="text-break">{file.name}</span>
                       </a>
+                      <div className="d-flex align-items-center gap-2 flex-shrink-0">
+                        <small className="text-muted">{formatSize(file.size)}</small>
+                        <a href={file.url} download={file.name} className="btn btn-sm btn-outline-primary py-0 px-2">
+                          <i className="bi bi-download"></i>
+                        </a>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
 
-            {lessons[topic.id]?.length === 0 ? (
-              <p className="text-muted small">Уроков пока нет</p>
-            ) : (
-              lessons[topic.id]?.map(lesson => (
-                <Link
-                  key={lesson.id}
-                  to={`/lessons/${lesson.id}`}
-                  className="text-decoration-none"
-                >
-                  <div className="lesson-item d-flex justify-content-between align-items-center">
-                    <div className="flex-grow-1 text-truncate" style={{ minWidth: 0 }}>
-                      <i className="bi bi-play-circle-fill me-2" style={{ color: '#486188' }}></i>
-                      <strong>{lesson.title}</strong>
-                    </div>
-                    <i className="bi bi-chevron-right text-muted flex-shrink-0"></i>
-                  </div>
-                </Link>
-              ))
-            )}
+              {/* Уроки */}
+              {lessons[topic.id]?.length > 0 ? (
+                <div className="ps-3 border-start">
+                  {lessons[topic.id].map(lesson => (
+                    <Link
+                      key={lesson.id}
+                      to={`/lessons/${lesson.id}`}
+                      className="text-decoration-none d-block py-2 text-break"
+                    >
+                      <div className="d-flex justify-content-between align-items-center hover-bg-light p-2 rounded">
+                        <div className="d-flex align-items-center">
+                          <i className="bi bi-play-circle-fill me-2 text-success fs-5"></i>
+                          <strong className="text-dark">{lesson.title}</strong>
+                        </div>
+                        <i className="bi bi-chevron-right text-muted"></i>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted small ms-3">Уроков пока нет</p>
+              )}
+            </div>
           </div>
         ))
       )}
