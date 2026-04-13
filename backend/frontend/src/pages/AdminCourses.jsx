@@ -3,14 +3,12 @@ import axios from 'axios';
 import FileUpload from '../components/FileUpload';
 
 export default function AdminCourses() {
-  // === СОСТОЯНИЯ МОДАЛОК ===
   const [showCourseModal, setShowCourseModal] = useState(false);
   const [showTopicModal, setShowTopicModal] = useState(false);
   const [showLessonModal, setShowLessonModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [showEnrollModal, setShowEnrollModal] = useState(false);
 
-  // === ДАННЫЕ ===
   const [courses, setCourses] = useState([]);
   const [students, setStudents] = useState([]);
   const [topics, setTopics] = useState({});
@@ -19,7 +17,6 @@ export default function AdminCourses() {
   const [topicFiles, setTopicFiles] = useState({});
   const [assignFiles, setAssignFiles] = useState({});
 
-  // === ФОРМЫ ===
   const [courseForm, setCourseForm] = useState({ title: '', description: '', id: null });
   const [topicForm, setTopicForm] = useState({ title: '', description: '', order_index: 0, course_id: '', id: null });
   const [lessonForm, setLessonForm] = useState({ title: '', content: '', order_index: 0, topic_id: '', id: null });
@@ -53,9 +50,7 @@ export default function AdminCourses() {
               id: f.id,
               name: f.file_name || f.name,
               url: f.file_path?.startsWith('http') ? f.file_path : `http://localhost:5000${f.file_path || f.url}`,
-              size: f.file_size || f.size,
-              mime_type: f.mime_type,
-              uploader_name: f.uploader_name
+              size: f.file_size || f.size
             }));
           } catch (err) { topicFilesMap[topic.id] = []; }
 
@@ -73,9 +68,7 @@ export default function AdminCourses() {
                   id: f.id,
                   name: f.file_name || f.name,
                   url: f.file_path?.startsWith('http') ? f.file_path : `http://localhost:5000${f.file_path || f.url}`,
-                  size: f.file_size || f.size,
-                  mime_type: f.mime_type,
-                  uploader_name: f.uploader_name
+                  size: f.file_size || f.size
                 }));
               } catch (err) { assignFilesMap[assign.id] = []; }
             }
@@ -225,27 +218,27 @@ export default function AdminCourses() {
   };
 
   return (
-    <div className="container-fluid">
+    <div className="container-fluid px-3">
       {/* Заголовок страницы */}
       <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-        <h3 className="fw-bold mb-0" style={{ color: '#486188' }}>
+        <h3 className="fw-bold mb-0 text-truncate" style={{ color: '#486188', maxWidth: '100%' }}>
           <i className="bi bi-collection-fill me-2"></i> Управление курсами
         </h3>
-        <div className="d-flex gap-2">
-          <button className="btn btn-outline-primary" onClick={() => setShowEnrollModal(true)}>
-            <i className="bi bi-person-plus me-1"></i> Записать
+        <div className="d-flex gap-2 flex-shrink-0">
+          <button className="btn btn-outline-primary btn-sm" onClick={() => setShowEnrollModal(true)}>
+            <i className="bi bi-person-plus me-1"></i> <span className="d-none d-md-inline">Записать</span>
           </button>
-          <button className="btn btn-primary" onClick={() => { setCourseForm({ title: '', description: '', id: null }); setShowCourseModal(true); }}>
-            <i className="bi bi-plus-lg me-1"></i> Курс
+          <button className="btn btn-primary btn-sm" onClick={() => { setCourseForm({ title: '', description: '', id: null }); setShowCourseModal(true); }}>
+            <i className="bi bi-plus-lg me-1"></i> <span className="d-none d-md-inline">Курс</span>
           </button>
         </div>
       </div>
 
       {courses.map(course => (
-        <div key={course.id} className="card mb-4 shadow-sm">
+        <div key={course.id} className="card mb-3 shadow-sm" style={{ overflow: 'hidden' }}>
           {/* Курс: Заголовок + Кнопки */}
-          <div className="card-header d-flex flex-wrap align-items-center gap-2" style={{ background: '#f8f9fa' }}>
-            <h5 className="mb-0 flex-grow-1 text-truncate">
+          <div className="card-header d-flex flex-wrap align-items-center gap-2 py-2" style={{ background: '#f8f9fa' }}>
+            <h5 className="mb-0 flex-grow-1 text-truncate" style={{ minWidth: 0, fontSize: '1rem' }}>
               <i className="bi bi-journal me-2 text-primary"></i> {course.title}
             </h5>
             <div className="d-flex gap-1 flex-shrink-0">
@@ -258,24 +251,24 @@ export default function AdminCourses() {
             </div>
           </div>
           
-          <div className="card-body">
-            <p className="text-muted mb-3">{course.description}</p>
+          <div className="card-body p-3">
+            <p className="text-muted mb-2 small text-break">{course.description}</p>
             
             {/* Темы */}
-            <div className="mt-3">
-              <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
-                <span className="fw-bold text-primary">Темы</span>
+            <div className="mt-2">
+              <div className="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+                <span className="fw-bold text-primary small">Темы</span>
                 <button className="btn btn-sm btn-outline-primary" onClick={() => { setTopicForm({ title: '', description: '', order_index: 0, course_id: course.id, id: null }); setShowTopicModal(true); }}>
                   <i className="bi bi-plus me-1"></i> Тема
                 </button>
               </div>
 
               {topics[course.id]?.map(topic => (
-                <div key={topic.id} className="card mb-3 border-start border-primary border-4">
-                  <div className="card-body p-3">
+                <div key={topic.id} className="card mb-2 border-start border-primary border-3">
+                  <div className="card-body p-2">
                     {/* Тема: Заголовок + Кнопки */}
-                    <div className="d-flex flex-wrap align-items-center gap-2 mb-3">
-                      <h6 className="mb-0 flex-grow-1 text-break">
+                    <div className="d-flex flex-wrap align-items-center gap-2 mb-2">
+                      <h6 className="mb-0 flex-grow-1 text-break small" style={{ minWidth: 0, fontSize: '0.9rem' }}>
                         <i className="bi bi-folder2-open me-2"></i> {topic.title}
                       </h6>
                       <div className="d-flex gap-1 flex-shrink-0">
@@ -286,35 +279,32 @@ export default function AdminCourses() {
                           <i className="bi bi-trash"></i>
                         </button>
                         <button className="btn btn-sm btn-success" onClick={() => { setLessonForm({ title: '', content: '', order_index: 0, topic_id: topic.id, id: null }); setShowLessonModal(true); }}>
-                          <i className="bi bi-play-circle me-1"></i> Урок
+                          <i className="bi bi-play-circle"></i>
                         </button>
                       </div>
                     </div>
 
                     {/* Файлы темы */}
-                    <div className="ps-4 mb-3">
-                      {topicFiles[topic.id]?.map(file => (
-                        <div key={file.id} className="d-flex flex-wrap justify-content-between align-items-center py-1 border-bottom border-light">
-                          <a href={file.url} target="_blank" rel="noreferrer" className="text-decoration-none text-primary me-2">
+                    <div className="ps-3 mb-2">
+                      {topicFiles[topic.id]?.slice(0, 2).map(file => (
+                        <div key={file.id} className="d-flex justify-content-between align-items-center py-1 small">
+                          <a href={file.url} target="_blank" rel="noreferrer" className="text-decoration-none text-primary text-truncate me-2" style={{ maxWidth: '70%' }}>
                             <i className="bi bi-file-earmark me-1"></i> {file.name}
                           </a>
-                          <div className="d-flex align-items-center gap-2">
-                            <small className="text-muted">{formatSize(file.size)}</small>
-                            <button className="btn btn-sm btn-link text-danger p-0" onClick={() => handleFileDelete('topics', topic.id, file.id)}>
-                              <i className="bi bi-x-circle"></i>
-                            </button>
-                          </div>
+                          <button className="btn btn-sm btn-link text-danger p-0 flex-shrink-0" onClick={() => handleFileDelete('topics', topic.id, file.id)}>
+                            <i className="bi bi-x-circle"></i>
+                          </button>
                         </div>
                       ))}
-                      <FileUpload onUpload={(files) => handleTopicFileUpload(topic.id, files)} label="+ Файл темы" accept=".pdf,.doc,.docx" maxSize={50} />
+                      <FileUpload onUpload={(files) => handleTopicFileUpload(topic.id, files)} label="+ Файл" accept=".pdf,.doc" maxSize={50} />
                     </div>
 
                     {/* Уроки */}
                     {lessons[topic.id]?.map(lesson => (
-                      <div key={lesson.id} className="ms-4 ps-3 border-start mb-3" style={{ borderColor: '#e9ecef' }}>
-                        <div className="d-flex flex-wrap align-items-center gap-2 mb-2">
-                          <span className="flex-grow-1 text-break">
-                            <i className="bi bi-play-fill text-success me-2"></i> {lesson.title}
+                      <div key={lesson.id} className="ms-3 ps-2 border-start mb-2" style={{ borderColor: '#e9ecef' }}>
+                        <div className="d-flex flex-wrap align-items-center gap-2 mb-1">
+                          <span className="flex-grow-1 text-break small" style={{ minWidth: 0 }}>
+                            <i className="bi bi-play-fill text-success me-1"></i> {lesson.title}
                           </span>
                           <div className="d-flex gap-1 flex-shrink-0">
                             <button className="btn btn-sm btn-outline-secondary" onClick={() => { setLessonForm({ ...lesson, id: lesson.id }); setShowLessonModal(true); }}>
@@ -324,17 +314,17 @@ export default function AdminCourses() {
                               <i className="bi bi-trash"></i>
                             </button>
                             <button className="btn btn-sm btn-info text-white" onClick={() => { setAssignForm({ title: '', description: '', max_score: 100, deadline: '', lesson_id: lesson.id, id: null }); setShowAssignModal(true); }}>
-                              <i className="bi bi-clipboard-check me-1"></i> Задание
+                              <i className="bi bi-clipboard-check"></i>
                             </button>
                           </div>
                         </div>
 
                         {/* Задания */}
                         {assignments[lesson.id]?.map(assign => (
-                          <div key={assign.id} className="ms-4 ps-3 border-start mb-2" style={{ borderColor: '#dee2e6' }}>
-                            <div className="d-flex flex-wrap align-items-center gap-2 mb-2">
-                              <span className="flex-grow-1 fw-bold text-break">
-                                <i className="bi bi-list-task me-2 text-info"></i> {assign.title}
+                          <div key={assign.id} className="ms-3 ps-2 border-start" style={{ borderColor: '#dee2e6' }}>
+                            <div className="d-flex flex-wrap align-items-center gap-1 mb-1">
+                              <span className="flex-grow-1 fw-bold text-break small" style={{ minWidth: 0 }}>
+                                <i className="bi bi-list-task me-1 text-info"></i> {assign.title}
                               </span>
                               <div className="d-flex gap-1 flex-shrink-0">
                                 <button className="btn btn-sm btn-outline-secondary" onClick={() => { setAssignForm({ ...assign, id: assign.id }); setShowAssignModal(true); }}>
@@ -347,20 +337,16 @@ export default function AdminCourses() {
                             </div>
                             
                             {/* Файлы задания */}
-                            {assignFiles[assign.id]?.map(file => (
-                              <div key={file.id} className="d-flex flex-wrap justify-content-between align-items-center py-1 ps-4">
-                                <a href={file.url} target="_blank" rel="noreferrer" className="text-decoration-none text-muted me-2 small">
+                            {assignFiles[assign.id]?.slice(0, 1).map(file => (
+                              <div key={file.id} className="d-flex justify-content-between align-items-center py-1 ps-3 small">
+                                <a href={file.url} target="_blank" rel="noreferrer" className="text-decoration-none text-muted text-truncate me-2" style={{ maxWidth: '70%' }}>
                                   <i className="bi bi-paperclip me-1"></i> {file.name}
                                 </a>
-                                <div className="d-flex align-items-center gap-2">
-                                  <small className="text-muted">{formatSize(file.size)}</small>
-                                  <button className="btn btn-sm btn-link text-danger p-0" onClick={() => handleFileDelete('assignments', assign.id, file.id)}>
-                                    <i className="bi bi-x-circle"></i>
-                                  </button>
-                                </div>
+                                <button className="btn btn-sm btn-link text-danger p-0 flex-shrink-0" onClick={() => handleFileDelete('assignments', assign.id, file.id)}>
+                                  <i className="bi bi-x-circle"></i>
+                                </button>
                               </div>
                             ))}
-                            <FileUpload onUpload={(files) => handleAssignFileUpload(assign.id, files)} label="+ Материал" accept=".pdf,.doc,.docx" maxSize={50} />
                           </div>
                         ))}
                       </div>
@@ -376,7 +362,7 @@ export default function AdminCourses() {
       {/* --- MODALS --- */}
       {showCourseModal && (
         <div className="modal fade show d-block" tabIndex="-1" style={{ background: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog">
+          <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">{courseForm.id ? 'Курс' : 'Новый курс'}</h5>
@@ -400,7 +386,7 @@ export default function AdminCourses() {
 
       {showTopicModal && (
         <div className="modal fade show d-block" tabIndex="-1" style={{ background: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog">
+          <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">{topicForm.id ? 'Тема' : 'Новая тема'}</h5>
@@ -424,7 +410,7 @@ export default function AdminCourses() {
 
       {showLessonModal && (
         <div className="modal fade show d-block" tabIndex="-1" style={{ background: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog modal-lg">
+          <div className="modal-dialog modal-dialog-centered modal-lg">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">{lessonForm.id ? 'Урок' : 'Новый урок'}</h5>
@@ -436,7 +422,7 @@ export default function AdminCourses() {
                   <input className="form-control" value={lessonForm.title} onChange={e => setLessonForm({...lessonForm, title: e.target.value})} required />
                 </div>
                 <div className="mb-3">
-                  <label className="form-label">Содержание (HTML)</label>
+                  <label className="form-label">Содержание</label>
                   <textarea className="form-control" rows="6" value={lessonForm.content} onChange={e => setLessonForm({...lessonForm, content: e.target.value})} />
                 </div>
                 <button type="submit" className="btn btn-primary w-100">Сохранить</button>
@@ -448,7 +434,7 @@ export default function AdminCourses() {
 
       {showAssignModal && (
         <div className="modal fade show d-block" tabIndex="-1" style={{ background: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog">
+          <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">{assignForm.id ? 'Задание' : 'Новое задание'}</h5>
@@ -476,7 +462,7 @@ export default function AdminCourses() {
 
       {showEnrollModal && (
         <div className="modal fade show d-block" tabIndex="-1" style={{ background: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog">
+          <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">Запись на курс</h5>
