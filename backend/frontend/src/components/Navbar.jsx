@@ -1,50 +1,80 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import axios from 'axios';
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
-const AuthContext = createContext(null);
+// ✅ Экспорт по умолчанию — обязательно для import Navbar from './Navbar'
+export default function Navbar() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
-// ✅ Получаем базовый URL бэкенда из переменной окружения
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token'));
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) setUser(JSON.parse(storedUser));
-    }
-    setLoading(false);
-  }, [token]);
-
-  const login = async (email, password) => {
-    // ✅ Используем полный URL с API_URL
-    const res = await axios.post(`${API_URL}/api/auth/login`, { email, password });
-    const { token: newToken, user: userData } = res.data;
-    setToken(newToken);
-    setUser(userData);
-    localStorage.setItem('token', newToken);
-    localStorage.setItem('user', JSON.stringify(userData));
-    axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-    return userData;
-  };
-
-  const logout = () => {
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    delete axios.defaults.headers.common['Authorization'];
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
+    <nav className="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+      <div className="container-fluid">
+        {/* Логотип */}
+        <Link className="navbar-brand fw-bold" to="/">
+          <i className="bi bi-mortarboard-fill me-2"></i>
+          StudentSystem
+        </Link>
 
-export const useAuth = () => useContext(AuthContext);
+        {/* Кнопка гамбургер для мобильных */}
+        <button
+          className="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span className="navbar-toggler-icon"></span>
+        </button>
+
+        {/* Меню */}
+        <div className="collapse navbar-collapse" id="navbarNav">
+          <ul className="navbar-nav me-auto">
+            <li className="nav-item">
+              <Link className="nav-link" to="/">
+                <i className="bi bi-speedometer2 me-1"></i> Дашборд
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/courses">
+                <i className="bi bi-journal-bookmark-fill me-1"></i> Курсы
+              </Link>
+            </li>
+          </ul>
+
+          {/* Информация о пользователе и выход */}
+          {user ? (
+            <div className="d-flex align-items-center">
+              <span className="text-light me-3 small d-none d-md-block">
+                <i className="bi bi-person-circle me-1"></i>
+                {user.full_name}
+                <span className="text-muted ms-1">
+                  ({user.role === 'admin' ? 'Админ' : 'Студент'})
+                </span>
+              </span>
+              <button
+                className="btn btn-outline-light btn-sm"
+                onClick={handleLogout}
+                type="button"
+              >
+                <i className="bi bi-box-arrow-right me-1"></i>
+                Выйти
+              </button>
+            </div>
+          ) : (
+            <Link to="/login" className="btn btn-outline-light btn-sm">
+              Войти
+            </Link>
+          )}
+        </div>
+      </div>
+    </nav>
+  );
+}
