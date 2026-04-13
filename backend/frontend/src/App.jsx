@@ -14,6 +14,15 @@ import AdminCheckSubmissions from './pages/AdminCheckSubmissions';
 import GradeSubmission from './pages/GradeSubmission';
 import ProtectedRoute from './components/ProtectedRoute';
 
+// 🔥 1. Импортируем axios
+import axios from 'axios';
+
+// 🔥 2. Получаем адрес бэкенда из переменных окружения
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+// 🔥 3. Глобально настраиваем axios для ВСЕХ запросов в приложении
+axios.defaults.baseURL = API_URL;
+
 function App() {
   const { user, loading } = useAuth();
 
