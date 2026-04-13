@@ -1,37 +1,50 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import axios from 'axios';
 
-export default function Navbar() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+const AuthContext = createContext(null);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+// ✅ Получаем базовый URL бэкенда из переменной окружения
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) setUser(JSON.parse(storedUser));
+    }
+    setLoading(false);
+  }, [token]);
+
+  const login = async (email, password) => {
+    // ✅ Используем полный URL с API_URL
+    const res = await axios.post(`${API_URL}/api/auth/login`, { email, password });
+    const { token: newToken, user: userData } = res.data;
+    setToken(newToken);
+    setUser(userData);
+    localStorage.setItem('token', newToken);
+    localStorage.setItem('user', JSON.stringify(userData));
+    axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+    return userData;
+  };
+
+  const logout = () => {
+    setToken(null);
+    setUser(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    delete axios.defaults.headers.common['Authorization'];
   };
 
   return (
-    <nav className="navbar navbar-expand-lg">
-      <div className="container-fluid">
-        <Link className="navbar-brand fw-bold" to="/">
-          <i className="bi bi-mortarboard-fill me-2"></i>
-          StudentSystem
-        </Link>
-
-        <div className="d-flex align-items-center gap-3">
-          <span className="text-white">
-            <i className="bi bi-person-circle me-1"></i>
-            {user?.full_name}
-            <span className="badge bg-warning text-dark ms-2">
-              {user?.role === 'admin' ? 'Преподаватель' : 'Студент'}
-            </span>
-          </span>
-          <button className="btn btn-outline-light btn-sm" onClick={handleLogout}>
-            <i className="bi bi-box-arrow-right me-1"></i> Выход
-          </button>
-        </div>
-      </div>
-    </nav>
+    <AuthContext.Provider value={{ user, token, loading, login, logout }}>
+      {children}
+    </AuthContext.Provider>
   );
-}
+};
+
+export const useAuth = () => useContext(AuthContext);
