@@ -2,8 +2,24 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import FileUpload from '../components/FileUpload';
 
-// 🔥 Добавляем адрес бэкенда для формирования правильных URL файлов
+// 🔥 Адрес бэкенда из переменных окружения
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+// 🔥 Функция для нормализации URL файлов (заменяет localhost на актуальный бэкенд)
+const normalizeFileUrl = (filePath, baseUrl) => {
+  if (!filePath) return '';
+  
+  // Если уже полный URL, заменяем localhost на актуальный бэкенд
+  if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
+    return filePath.replace(
+      /http:\/\/localhost:5000/g, 
+      baseUrl.replace(/\/$/, '')
+    );
+  }
+  
+  // Если относительный путь — добавляем baseUrl
+  return `${baseUrl}${filePath}`;
+};
 
 export default function AdminCourses() {
   const [showCourseModal, setShowCourseModal] = useState(false);
@@ -49,17 +65,11 @@ export default function AdminCourses() {
         for (const topic of tRes.data) {
           try {
             const tfRes = await axios.get(`/api/topics/${topic.id}/files`);
+            // 🔥 Используем normalizeFileUrl для всех файлов
             topicFilesMap[topic.id] = (tfRes.data || []).map(f => ({
               id: f.id,
               name: f.file_name || f.name || 'Без названия',
-              // 🔥 ИСПРАВЛЕНО: используем API_URL вместо localhost
-              url: f.file_path 
-                ? (f.file_path.startsWith('http') 
-                    ? f.file_path 
-                    : `${API_URL}${f.file_path}`)
-                : (f.url?.startsWith('http') 
-                    ? f.url 
-                    : `${API_URL}${f.url || ''}`),
+              url: normalizeFileUrl(f.file_path || f.url, API_URL),
               size: f.file_size || f.size || 0
             }));
           } catch (err) { topicFilesMap[topic.id] = []; }
@@ -74,17 +84,11 @@ export default function AdminCourses() {
             for (const assign of aRes.data) {
               try {
                 const afRes = await axios.get(`/api/assignments/${assign.id}/files`);
+                // 🔥 Используем normalizeFileUrl для всех файлов
                 assignFilesMap[assign.id] = (afRes.data || []).map(f => ({
                   id: f.id,
                   name: f.file_name || f.name || 'Без названия',
-                  // 🔥 ИСПРАВЛЕНО: используем API_URL вместо localhost
-                  url: f.file_path 
-                    ? (f.file_path.startsWith('http') 
-                        ? f.file_path 
-                        : `${API_URL}${f.file_path}`)
-                    : (f.url?.startsWith('http') 
-                        ? f.url 
-                        : `${API_URL}${f.url || ''}`),
+                  url: normalizeFileUrl(f.file_path || f.url, API_URL),
                   size: f.file_size || f.size || 0
                 }));
               } catch (err) { assignFilesMap[assign.id] = []; }
@@ -184,7 +188,7 @@ export default function AdminCourses() {
     } catch (err) { console.error(err); }
   };
 
-  // 🔥 Загрузка файла в тему — ИСПРАВЛЕНО: URL с API_URL
+  // 🔥 Загрузка файла в тему — используем normalizeFileUrl
   const handleTopicFileUpload = async (topicId, fileList) => {
     if (!fileList || fileList.length === 0) {
       alert('Выберите файл');
@@ -201,14 +205,8 @@ export default function AdminCourses() {
       const newFile = {
         id: uploaded.id,
         name: uploaded.file_name || uploaded.name || fileList[0].name,
-        // 🔥 ИСПРАВЛЕНО: используем API_URL вместо localhost
-        url: uploaded.file_path 
-          ? (uploaded.file_path.startsWith('http') 
-              ? uploaded.file_path 
-              : `${API_URL}${uploaded.file_path}`)
-          : (uploaded.url?.startsWith('http') 
-              ? uploaded.url 
-              : `${API_URL}${uploaded.url || ''}`),
+        // 🔥 Используем normalizeFileUrl
+        url: normalizeFileUrl(uploaded.file_path || uploaded.url, API_URL),
         size: uploaded.file_size || uploaded.size || fileList[0].size
       };
       
@@ -223,7 +221,7 @@ export default function AdminCourses() {
     }
   };
 
-  // 🔥 Загрузка файла в задание — ИСПРАВЛЕНО: URL с API_URL
+  // 🔥 Загрузка файла в задание — используем normalizeFileUrl
   const handleAssignFileUpload = async (assignId, fileList) => {
     if (!fileList || fileList.length === 0) {
       alert('Выберите файл');
@@ -240,14 +238,8 @@ export default function AdminCourses() {
       const newFile = {
         id: uploaded.id,
         name: uploaded.file_name || uploaded.name || fileList[0].name,
-        // 🔥 ИСПРАВЛЕНО: используем API_URL вместо localhost
-        url: uploaded.file_path 
-          ? (uploaded.file_path.startsWith('http') 
-              ? uploaded.file_path 
-              : `${API_URL}${uploaded.file_path}`)
-          : (uploaded.url?.startsWith('http') 
-              ? uploaded.url 
-              : `${API_URL}${uploaded.url || ''}`),
+        // 🔥 Используем normalizeFileUrl
+        url: normalizeFileUrl(uploaded.file_path || uploaded.url, API_URL),
         size: uploaded.file_size || uploaded.size || fileList[0].size
       };
       
