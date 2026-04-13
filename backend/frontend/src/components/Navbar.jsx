@@ -12,96 +12,83 @@ export default function Navbar() {
   };
 
   return (
-    <nav 
-      className="navbar navbar-expand-lg navbar-dark fixed-top"
-      style={{ 
-        backgroundColor: '#486188',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
-      }}
-    >
-      <div className="container-fluid px-3">
-        
-        {/* Логотип */}
-        <Link className="navbar-brand fw-bold d-flex align-items-center" to="/">
-          <i className="bi bi-mortarboard-fill me-2" style={{ fontSize: '1.4rem' }}></i>
-          <span className="d-none d-sm-inline">StudentSystem</span>
-          <span className="d-sm-none">SS</span>
-        </Link>
-
-        {/* Кнопка гамбургер для мобильных */}
-        <button
-          className="navbar-toggler border-0"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarContent"
-          aria-controls="navbarContent"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span className="navbar-toggler-icon"></span>
-        </button>
-
-        {/* Контент навбара */}
-        <div className="collapse navbar-collapse" id="navbarContent">
+    <>
+      <nav className="navbar navbar-expand-lg navbar-dark fixed-top" style={{ backgroundColor: '#486188', minHeight: '56px' }}>
+        <div className="container-fluid">
           
-          {/* Ссылки меню (слева) */}
-          <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-            <li className="nav-item">
-              <Link 
-                className="nav-link text-white px-3" 
-                to="/"
-                style={{ transition: 'opacity 0.2s' }}
-              >
-                <i className="bi bi-speedometer2 me-1"></i> Дашборд
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link 
-                className="nav-link text-white px-3" 
-                to="/courses"
-                style={{ transition: 'opacity 0.2s' }}
-              >
-                <i className="bi bi-journal-bookmark-fill me-1"></i> Курсы
-              </Link>
-            </li>
-          </ul>
+          {/* Логотип */}
+          <Link className="navbar-brand d-flex align-items-center" to="/">
+            <i className="bi bi-mortarboard-fill me-2" style={{ fontSize: '1.5rem' }}></i>
+            <span style={{ fontSize: '1.1rem', fontWeight: '600' }}>StudentSystem</span>
+          </Link>
 
-          {/* Профиль и выход (справа) - ms-auto толкает вправо */}
-          <div className="d-flex align-items-center ms-auto">
-            {user ? (
-              <>
-                <span className="text-white me-3 small d-none d-md-block">
-                  <i className="bi bi-person-circle me-1"></i>
-                  {user.full_name?.split(' ')[0]}
-                  <span className="text-white-50 ms-1">
-                    ({user.role === 'admin' ? 'Админ' : 'Студент'})
+          {/* Кнопка меню для мобильных */}
+          <button
+            className="navbar-toggler border-0 shadow-none"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarContent"
+            aria-controls="navbarContent"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span className="navbar-toggler-icon"></span>
+          </button>
+
+          {/* Контент навбара */}
+          <div className="collapse navbar-collapse" id="navbarContent">
+            
+            {/* Ссылки меню (слева) */}
+            <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+              <li className="nav-item">
+                <Link className="nav-link px-3" to="/">
+                  <i className="bi bi-speedometer2 me-1"></i> Дашборд
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link px-3" to="/courses">
+                  <i className="bi bi-journal-bookmark-fill me-1"></i> Курсы
+                </Link>
+              </li>
+            </ul>
+
+            {/* Профиль и выход (справа) */}
+            <div className="d-flex align-items-center gap-2">
+              {user ? (
+                <>
+                  <span className="text-white-50 small d-none d-md-inline">
+                    <i className="bi bi-person-circle me-1"></i>
+                    {user.full_name?.split(' ')[0]}
+                    <span className="ms-1 opacity-75">
+                      ({user.role === 'admin' ? 'Админ' : 'Студент'})
+                    </span>
                   </span>
-                </span>
-                <button 
-                  className="btn btn-outline-light btn-sm" 
-                  onClick={handleLogout}
-                  style={{ 
-                    borderRadius: '20px',
-                    padding: '4px 16px',
-                    fontWeight: '500'
-                  }}
+                  <button 
+                    className="btn btn-outline-light btn-sm d-flex align-items-center gap-1" 
+                    onClick={handleLogout}
+                    style={{ borderRadius: '6px', padding: '4px 12px' }}
+                  >
+                    <i className="bi bi-box-arrow-right"></i> 
+                    <span className="d-none d-sm-inline">Выйти</span>
+                  </button>
+                </>
+              ) : (
+                <Link 
+                  to="/login" 
+                  className="btn btn-outline-light btn-sm"
+                  style={{ borderRadius: '6px', padding: '4px 16px' }}
                 >
-                  <i className="bi bi-box-arrow-right me-1"></i> Выйти
-                </button>
-              </>
-            ) : (
-              <Link 
-                to="/login" 
-                className="btn btn-outline-light btn-sm"
-                style={{ borderRadius: '20px', padding: '4px 16px' }}
-              >
-                Войти
-              </Link>
-            )}
+                  Войти
+                </Link>
+              )}
+            </div>
+            
           </div>
-          
         </div>
-      </div>
-    </nav>
+      </nav>
+      
+      {/* ВАЖНО: Отступ для контента под fixed-top навбаром */}
+      <div style={{ marginTop: '56px' }}></div>
+    </>
   );
 }
