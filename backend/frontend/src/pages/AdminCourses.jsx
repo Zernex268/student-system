@@ -2,26 +2,37 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import FileUpload from '../components/FileUpload';
 
-// 🔥 Адрес бэкенда из переменных окружения
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+// 🔥 НАДЕЖНОЕ определение адреса бэкенда
+const getApiUrl = () => {
+  // Если мы на продакшене (vercel.app) — используем Railway
+  if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
+    return 'https://believable-blessing-production.up.railway.app';
+  }
+  // Локально — localhost
+  return 'http://localhost:5000';
+};
 
-// 🔥 Функция для нормализации URL файлов (заменяет localhost на актуальный бэкенд)
-const normalizeFileUrl = (filePath, baseUrl) => {
+const API_URL = getApiUrl();
+
+// 🔥 Функция для исправления любых URL файлов
+const normalizeFileUrl = (filePath) => {
   if (!filePath) return '';
   
-  // Если уже полный URL, заменяем localhost на актуальный бэкенд
-  if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
-    return filePath.replace(
-      /http:\/\/localhost:5000/g, 
-      baseUrl.replace(/\/$/, '')
-    );
+  // Если уже https://railway.app — оставляем как есть
+  if (filePath.includes('railway.app')) {
+    return filePath;
   }
   
-  // Если относительный путь — добавляем baseUrl
-  return `${baseUrl}${filePath}`;
+  // Заменяем любой localhost:5000 на актуальный API_URL
+  return filePath.replace(/http:\/\/localhost:5000/g, API_URL.replace(/\/$/, ''));
 };
 
 export default function AdminCourses() {
+  // Для отладки — выводим API_URL в консоль
+  useEffect(() => {
+    console.log('🔗 API_URL установлен:', API_URL);
+  }, []);
+
   const [showCourseModal, setShowCourseModal] = useState(false);
   const [showTopicModal, setShowTopicModal] = useState(false);
   const [showLessonModal, setShowLessonModal] = useState(false);
@@ -65,11 +76,11 @@ export default function AdminCourses() {
         for (const topic of tRes.data) {
           try {
             const tfRes = await axios.get(`/api/topics/${topic.id}/files`);
-            // 🔥 Используем normalizeFileUrl для всех файлов
             topicFilesMap[topic.id] = (tfRes.data || []).map(f => ({
               id: f.id,
               name: f.file_name || f.name || 'Без названия',
-              url: normalizeFileUrl(f.file_path || f.url, API_URL),
+              // 🔥 Используем надежную нормализацию
+              url: normalizeFileUrl(f.file_path || f.url),
               size: f.file_size || f.size || 0
             }));
           } catch (err) { topicFilesMap[topic.id] = []; }
@@ -84,11 +95,11 @@ export default function AdminCourses() {
             for (const assign of aRes.data) {
               try {
                 const afRes = await axios.get(`/api/assignments/${assign.id}/files`);
-                // 🔥 Используем normalizeFileUrl для всех файлов
                 assignFilesMap[assign.id] = (afRes.data || []).map(f => ({
                   id: f.id,
                   name: f.file_name || f.name || 'Без названия',
-                  url: normalizeFileUrl(f.file_path || f.url, API_URL),
+                  // 🔥 Используем надежную нормализацию
+                  url: normalizeFileUrl(f.file_path || f.url),
                   size: f.file_size || f.size || 0
                 }));
               } catch (err) { assignFilesMap[assign.id] = []; }
@@ -188,7 +199,7 @@ export default function AdminCourses() {
     } catch (err) { console.error(err); }
   };
 
-  // 🔥 Загрузка файла в тему — используем normalizeFileUrl
+  // 🔥 Загрузка файла в тему
   const handleTopicFileUpload = async (topicId, fileList) => {
     if (!fileList || fileList.length === 0) {
       alert('Выберите файл');
@@ -205,8 +216,8 @@ export default function AdminCourses() {
       const newFile = {
         id: uploaded.id,
         name: uploaded.file_name || uploaded.name || fileList[0].name,
-        // 🔥 Используем normalizeFileUrl
-        url: normalizeFileUrl(uploaded.file_path || uploaded.url, API_URL),
+        // 🔥 Надежная нормализация URL
+        url: normalizeFileUrl(uploaded.file_path || uploaded.url),
         size: uploaded.file_size || uploaded.size || fileList[0].size
       };
       
@@ -221,7 +232,7 @@ export default function AdminCourses() {
     }
   };
 
-  // 🔥 Загрузка файла в задание — используем normalizeFileUrl
+  // 🔥 Загрузка файла в задание
   const handleAssignFileUpload = async (assignId, fileList) => {
     if (!fileList || fileList.length === 0) {
       alert('Выберите файл');
@@ -238,8 +249,8 @@ export default function AdminCourses() {
       const newFile = {
         id: uploaded.id,
         name: uploaded.file_name || uploaded.name || fileList[0].name,
-        // 🔥 Используем normalizeFileUrl
-        url: normalizeFileUrl(uploaded.file_path || uploaded.url, API_URL),
+        // 🔥 Надежная нормализация URL
+        url: normalizeFileUrl(uploaded.file_path || uploaded.url),
         size: uploaded.file_size || uploaded.size || fileList[0].size
       };
       
@@ -297,7 +308,7 @@ export default function AdminCourses() {
 
       {courses.map(course => (
         <div key={course.id} className="card mb-3 shadow-sm" style={{ overflow: 'hidden' }}>
-          {/* Курс: Заголовок + Кнопки — темный фон, белый текст */}
+          {/* Курс: Заголовок + Кнопки */}
           <div className="card-header d-flex flex-wrap align-items-center gap-2 py-2" style={{ background: '#486188', color: 'white' }}>
             <h5 className="mb-0 flex-grow-1 text-truncate" style={{ minWidth: 0, fontSize: '1rem', color: 'white' }}>
               <i className="bi bi-journal me-2"></i> {course.title}
