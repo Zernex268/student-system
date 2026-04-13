@@ -82,21 +82,24 @@ export default function CourseDetail() {
       </nav>
 
       <div className="card mb-4">
-        <div className="card-header">{course.title}</div>
+        <div className="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <span className="flex-grow-1 text-truncate" style={{ minWidth: 0 }}>
+            {course.title}
+          </span>
+          {user.role === 'admin' && (
+            <Link
+              to={`/admin/submissions/${courseId}`}
+              className="btn btn-primary btn-sm flex-shrink-0"
+            >
+              <i className="bi bi-clipboard-check me-1"></i> Проверить ответы
+            </Link>
+          )}
+        </div>
         <div className="card-body">
           <p className="text-muted">{course.description}</p>
           <small className="text-muted">
             <i className="bi bi-person me-1"></i> {course.creator_name}
           </small>
-
-          {user.role === 'admin' && (
-            <Link
-              to={`/admin/submissions/${courseId}`}
-              className="btn btn-primary float-end"
-            >
-              <i className="bi bi-clipboard-check me-1"></i> Проверить ответы
-            </Link>
-          )}
         </div>
       </div>
 
@@ -125,19 +128,19 @@ export default function CourseDetail() {
                   <i className="bi bi-paperclip me-1"></i>Файлы темы:
                 </small>
                 {topicFiles[topic.id].map((file, index) => (
-                  <div key={file.id || index} className="small mb-2 d-flex align-items-center justify-content-between">
+                  <div key={file.id || index} className="small mb-2 d-flex align-items-center justify-content-between flex-wrap gap-2">
                     <a 
                       href={file.url} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="text-decoration-none d-flex align-items-center"
-                      style={{ color: '#486188', fontWeight: 500 }}
+                      className="text-decoration-none d-flex align-items-center flex-grow-1"
+                      style={{ color: '#486188', fontWeight: 500, minWidth: 0 }}
                       download={file.name}
                     >
-                      <i className="bi bi-file-earmark me-2"></i>
-                      <span>{file.name}</span>
+                      <i className="bi bi-file-earmark me-2 flex-shrink-0"></i>
+                      <span className="text-truncate">{file.name}</span>
                     </a>
-                    <div className="d-flex align-items-center gap-2">
+                    <div className="d-flex align-items-center gap-2 flex-shrink-0">
                       <small className="text-muted">
                         {formatSize(file.size)}
                       </small>
@@ -166,11 +169,11 @@ export default function CourseDetail() {
                   className="text-decoration-none"
                 >
                   <div className="lesson-item d-flex justify-content-between align-items-center">
-                    <div>
+                    <div className="flex-grow-1 text-truncate" style={{ minWidth: 0 }}>
                       <i className="bi bi-play-circle-fill me-2" style={{ color: '#486188' }}></i>
                       <strong>{lesson.title}</strong>
                     </div>
-                    <i className="bi bi-chevron-right text-muted"></i>
+                    <i className="bi bi-chevron-right text-muted flex-shrink-0"></i>
                   </div>
                 </Link>
               ))

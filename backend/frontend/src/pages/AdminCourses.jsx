@@ -358,12 +358,12 @@ export default function AdminCourses() {
   return (
     <div>
       {/* Заголовок + кнопки */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h3 className="fw-bold" style={{ color: '#486188' }}>
+      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <h3 className="fw-bold mb-0" style={{ color: '#486188' }}>
           <i className="bi bi-collection-fill me-2"></i> Управление курсами
         </h3>
-        <div>
-          <button className="btn btn-outline-primary me-2" onClick={() => setShowEnrollModal(true)}>
+        <div className="d-flex gap-2">
+          <button className="btn btn-outline-primary" onClick={() => setShowEnrollModal(true)}>
             <i className="bi bi-person-plus me-1"></i> Записать на курс
           </button>
           <button className="btn btn-primary" onClick={() => {
@@ -378,12 +378,12 @@ export default function AdminCourses() {
       {/* Список курсов */}
       {courses.map(course => (
         <div key={course.id} className="card mb-4">
-          <div className="card-header d-flex justify-content-between align-items-center">
-            <span>
+          <div className="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <span className="flex-grow-1 text-truncate" style={{ minWidth: 0 }}>
               <i className="bi bi-journal me-2"></i>
               {course.title}
             </span>
-            <div>
+            <div className="d-flex gap-1 flex-shrink-0">
               <button 
                 className="btn btn-sm btn-outline-light me-1" 
                 onClick={() => {
@@ -410,10 +410,10 @@ export default function AdminCourses() {
 
             {/* === РАЗДЕЛ: ТЕМЫ === */}
             <div className="mt-4">
-              <div className="d-flex justify-content-between align-items-center mb-2">
+              <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                 <h6 className="fw-bold mb-0" style={{ color: '#486188' }}>Темы</h6>
                 <button 
-                  className="btn btn-sm btn-outline-primary" 
+                  className="btn btn-sm btn-outline-primary flex-shrink-0" 
                   onClick={() => {
                     setTopicForm({ title: '', description: '', order_index: 0, course_id: course.id, id: null });
                     setShowTopicModal(true);
@@ -426,12 +426,12 @@ export default function AdminCourses() {
               {topics[course.id]?.map(topic => (
                 <div key={topic.id} className="topic-section mb-3">
                   {/* Заголовок темы + кнопки */}
-                  <div className="d-flex justify-content-between align-items-center mb-2">
-                    <strong className="d-flex align-items-center">
+                  <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                    <strong className="d-flex align-items-center flex-grow-1 text-truncate" style={{ minWidth: 0 }}>
                       <i className="bi bi-folder2 me-2" style={{ color: '#486188' }}></i>
                       {topic.title}
                     </strong>
-                    <div>
+                    <div className="d-flex gap-1 flex-shrink-0 flex-wrap">
                       <button 
                         className="btn btn-sm btn-outline-primary me-1" 
                         onClick={() => {
@@ -470,7 +470,7 @@ export default function AdminCourses() {
                         {topicFiles[topic.id].map((file, index) => (
                           <div 
                             key={file.id || index} 
-                            className="d-flex align-items-center justify-content-between small py-1"
+                            className="d-flex align-items-center justify-content-between small py-1 flex-wrap gap-2"
                             style={{ borderBottom: '1px dashed var(--border)' }}
                           >
                             <a 
@@ -515,12 +515,12 @@ export default function AdminCourses() {
                          style={{ background: 'rgba(72,97,136,0.04)', borderLeft: '3px solid #486188' }}>
                       
                       {/* Заголовок урока + кнопки */}
-                      <div className="d-flex justify-content-between align-items-center">
-                        <span className="d-flex align-items-center">
+                      <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <span className="d-flex align-items-center flex-grow-1 text-truncate" style={{ minWidth: 0 }}>
                           <i className="bi bi-play-circle me-2" style={{ color: '#486188' }}></i>
                           {lesson.title}
                         </span>
-                        <div>
+                        <div className="d-flex gap-1 flex-shrink-0 flex-wrap">
                           <button 
                             className="btn btn-sm btn-outline-primary me-1" 
                             onClick={() => {
@@ -554,15 +554,15 @@ export default function AdminCourses() {
                              style={{ background: 'rgba(72,97,136,0.08)', border: '1px solid var(--border)' }}>
                           
                           {/* Заголовок задания + кнопки */}
-                          <div className="d-flex justify-content-between align-items-center mb-2">
-                            <span className="d-flex align-items-center">
+                          <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                            <span className="d-flex align-items-center flex-grow-1 text-truncate" style={{ minWidth: 0 }}>
                               <i className="bi bi-clipboard-check me-2" style={{ color: '#486188' }}></i>
-                              <strong>{assign.title}</strong>
-                              <small className="text-muted ms-2">
+                              <strong className="text-truncate">{assign.title}</strong>
+                              <small className="text-muted ms-2 flex-shrink-0">
                                 (макс. {assign.max_score} бал.)
                               </small>
                             </span>
-                            <div>
+                            <div className="d-flex gap-1 flex-shrink-0">
                               <button 
                                 className="btn btn-sm btn-outline-primary me-1" 
                                 onClick={() => {
@@ -592,7 +592,7 @@ export default function AdminCourses() {
                                 {assignFiles[assign.id].map((file, index) => (
                                   <div 
                                     key={file.id || index} 
-                                    className="d-flex align-items-center justify-content-between small py-1"
+                                    className="d-flex align-items-center justify-content-between small py-1 flex-wrap gap-2"
                                     style={{ borderBottom: '1px dashed var(--border)' }}
                                   >
                                     <a 
@@ -713,29 +713,28 @@ export default function AdminCourses() {
       )}
 
       {/* Assignment Modal */}
-     {/* Assignment Modal */}
-{showAssignModal && (
-  <ModalWrapper title={assignForm.id ? 'Редактировать задание' : 'Новое задание'} onClose={() => setShowAssignModal(false)}>
-    <form onSubmit={handleAssignSave}>
-      <div className="mb-3">
-        <label className="form-label fw-bold">Название</label>
-        <input className="form-control" value={assignForm.title}
-          onChange={e => setAssignForm({...assignForm, title: e.target.value})} required />
-      </div>
-      <div className="mb-3">
-        <label className="form-label fw-bold">Описание</label>
-        <textarea className="form-control" rows="3" value={assignForm.description}
-          onChange={e => setAssignForm({...assignForm, description: e.target.value})} />
-      </div>
-      <div className="mb-3">
-        <label className="form-label fw-bold">Дедлайн</label>
-        <input type="datetime-local" className="form-control" value={assignForm.deadline?.substring(0, 16) || ''}
-          onChange={e => setAssignForm({...assignForm, deadline: e.target.value})} />
-      </div>
-      <button type="submit" className="btn btn-primary">Сохранить</button>
-    </form>
-  </ModalWrapper>
-)}
+      {showAssignModal && (
+        <ModalWrapper title={assignForm.id ? 'Редактировать задание' : 'Новое задание'} onClose={() => setShowAssignModal(false)}>
+          <form onSubmit={handleAssignSave}>
+            <div className="mb-3">
+              <label className="form-label fw-bold">Название</label>
+              <input className="form-control" value={assignForm.title}
+                onChange={e => setAssignForm({...assignForm, title: e.target.value})} required />
+            </div>
+            <div className="mb-3">
+              <label className="form-label fw-bold">Описание</label>
+              <textarea className="form-control" rows="3" value={assignForm.description}
+                onChange={e => setAssignForm({...assignForm, description: e.target.value})} />
+            </div>
+            <div className="mb-3">
+              <label className="form-label fw-bold">Дедлайн</label>
+              <input type="datetime-local" className="form-control" value={assignForm.deadline?.substring(0, 16) || ''}
+                onChange={e => setAssignForm({...assignForm, deadline: e.target.value})} />
+            </div>
+            <button type="submit" className="btn btn-primary">Сохранить</button>
+          </form>
+        </ModalWrapper>
+      )}
 
       {/* Enroll Modal */}
       {showEnrollModal && (
