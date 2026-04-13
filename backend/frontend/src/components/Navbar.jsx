@@ -2,7 +2,6 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-// ✅ Экспорт по умолчанию — обязательно для import Navbar from './Navbar'
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -13,17 +12,19 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    // Используем ваш фирменный цвет вместо bg-dark
+    <nav className="navbar navbar-expand-lg" style={{ backgroundColor: '#486188', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
       <div className="container-fluid">
+        
         {/* Логотип */}
-        <Link className="navbar-brand fw-bold" to="/">
-          <i className="bi bi-mortarboard-fill me-2"></i>
+        <Link className="navbar-brand text-white fw-bold d-flex align-items-center" to="/">
+          <i className="bi bi-mortarboard-fill me-2" style={{ fontSize: '1.5rem' }}></i>
           StudentSystem
         </Link>
 
-        {/* Кнопка гамбургер для мобильных */}
+        {/* Кнопка для мобильных */}
         <button
-          className="navbar-toggler"
+          className="navbar-toggler border-0"
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#navbarNav"
@@ -31,48 +32,48 @@ export default function Navbar() {
           aria-expanded="false"
           aria-label="Toggle navigation"
         >
-          <span className="navbar-toggler-icon"></span>
+          <i className="bi bi-list text-white fs-4"></i>
         </button>
 
-        {/* Меню */}
+        {/* Основное меню */}
         <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav me-auto">
+          {/* Ссылки слева */}
+          <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
-              <Link className="nav-link" to="/">
+              <Link className="nav-link text-white opacity-75 hover-opacity-100" to="/">
                 <i className="bi bi-speedometer2 me-1"></i> Дашборд
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/courses">
+              <Link className="nav-link text-white opacity-75" to="/courses">
                 <i className="bi bi-journal-bookmark-fill me-1"></i> Курсы
               </Link>
             </li>
           </ul>
 
-          {/* Информация о пользователе и выход */}
-          {user ? (
-            <div className="d-flex align-items-center">
-              <span className="text-light me-3 small d-none d-md-block">
-                <i className="bi bi-person-circle me-1"></i>
-                {user.full_name}
-                <span className="text-muted ms-1">
-                  ({user.role === 'admin' ? 'Админ' : 'Студент'})
+          {/* Блок справа (ms-auto отодвигает его в конец) */}
+          <div className="d-flex align-items-center ms-auto">
+            {user ? (
+              <>
+                <span className="text-white me-3 small d-none d-md-block opacity-75">
+                  <i className="bi bi-person-circle me-1"></i>
+                  {user.full_name}
+                  <span className="ms-1 opacity-50">({user.role === 'admin' ? 'Админ' : 'Студент'})</span>
                 </span>
-              </span>
-              <button
-                className="btn btn-outline-light btn-sm"
-                onClick={handleLogout}
-                type="button"
-              >
-                <i className="bi bi-box-arrow-right me-1"></i>
-                Выйти
-              </button>
-            </div>
-          ) : (
-            <Link to="/login" className="btn btn-outline-light btn-sm">
-              Войти
-            </Link>
-          )}
+                <button 
+                  className="btn btn-outline-light btn-sm" 
+                  onClick={handleLogout}
+                  style={{ borderRadius: '20px', padding: '5px 15px' }}
+                >
+                  <i className="bi bi-box-arrow-right me-1"></i> Выйти
+                </button>
+              </>
+            ) : (
+              <Link to="/login" className="btn btn-outline-light btn-sm">
+                Войти
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     </nav>
