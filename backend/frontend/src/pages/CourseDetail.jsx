@@ -3,6 +3,9 @@ import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+// 🔥 Добавляем адрес бэкенда для формирования правильных URL файлов
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export default function CourseDetail() {
   const { courseId } = useParams();
   const { user } = useAuth();
@@ -32,9 +35,14 @@ export default function CourseDetail() {
           filesMap[topic.id] = (filesRes.data || []).map(file => ({
             id: file.id,
             name: file.file_name || file.name || 'Без названия',
-            url: file.file_path?.startsWith('http') 
-              ? file.file_path 
-              : `http://localhost:5000${file.file_path || file.url || ''}`,
+            // 🔥 ИСПРАВЛЕНО: используем API_URL вместо localhost
+            url: file.file_path 
+              ? (file.file_path.startsWith('http') 
+                  ? file.file_path 
+                  : `${API_URL}${file.file_path}`)
+              : (file.url?.startsWith('http') 
+                  ? file.url 
+                  : `${API_URL}${file.url || ''}`),
             size: file.file_size || file.size || 0,
             uploader_name: file.uploader_name
           }));
@@ -79,7 +87,7 @@ export default function CourseDetail() {
       </nav>
 
       <div className="card mb-4 shadow-sm">
-        {/* Заголовок курса — ИСПРАВЛЕНО: темный фон, белый текст */}
+        {/* Заголовок курса — темный фон, белый текст */}
         <div className="card-header d-flex flex-wrap justify-content-between align-items-center gap-2" style={{ background: '#486188', color: 'white' }}>
           <h4 className="mb-0 flex-grow-1 text-break" style={{ color: 'white' }}>{course.title}</h4>
           {user.role === 'admin' && (
@@ -111,7 +119,7 @@ export default function CourseDetail() {
               </h6>
               {topic.description && <p className="text-muted small mb-3">{topic.description}</p>}
 
-              {/* Файлы темы — РАСШИРЕНО: все форматы */}
+              {/* Файлы темы */}
               {topicFiles[topic.id] && topicFiles[topic.id].length > 0 && (
                 <div className="mb-3 p-2" style={{ 
                   background: 'rgba(72, 97, 136, 0.06)', 

@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import FileUpload from '../components/FileUpload';
 
+// 🔥 Добавляем адрес бэкенда для формирования правильных URL файлов
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export default function AdminCourses() {
   const [showCourseModal, setShowCourseModal] = useState(false);
   const [showTopicModal, setShowTopicModal] = useState(false);
@@ -49,9 +52,14 @@ export default function AdminCourses() {
             topicFilesMap[topic.id] = (tfRes.data || []).map(f => ({
               id: f.id,
               name: f.file_name || f.name || 'Без названия',
-              url: f.file_path?.startsWith('http') 
-                ? f.file_path 
-                : `http://localhost:5000${f.file_path || f.url || ''}`,
+              // 🔥 ИСПРАВЛЕНО: используем API_URL вместо localhost
+              url: f.file_path 
+                ? (f.file_path.startsWith('http') 
+                    ? f.file_path 
+                    : `${API_URL}${f.file_path}`)
+                : (f.url?.startsWith('http') 
+                    ? f.url 
+                    : `${API_URL}${f.url || ''}`),
               size: f.file_size || f.size || 0
             }));
           } catch (err) { topicFilesMap[topic.id] = []; }
@@ -69,9 +77,14 @@ export default function AdminCourses() {
                 assignFilesMap[assign.id] = (afRes.data || []).map(f => ({
                   id: f.id,
                   name: f.file_name || f.name || 'Без названия',
-                  url: f.file_path?.startsWith('http') 
-                    ? f.file_path 
-                    : `http://localhost:5000${f.file_path || f.url || ''}`,
+                  // 🔥 ИСПРАВЛЕНО: используем API_URL вместо localhost
+                  url: f.file_path 
+                    ? (f.file_path.startsWith('http') 
+                        ? f.file_path 
+                        : `${API_URL}${f.file_path}`)
+                    : (f.url?.startsWith('http') 
+                        ? f.url 
+                        : `${API_URL}${f.url || ''}`),
                   size: f.file_size || f.size || 0
                 }));
               } catch (err) { assignFilesMap[assign.id] = []; }
@@ -171,7 +184,7 @@ export default function AdminCourses() {
     } catch (err) { console.error(err); }
   };
 
-  // 🔥 ИСПРАВЛЕНА: Загрузка файла в тему — файлы больше не исчезают
+  // 🔥 Загрузка файла в тему — ИСПРАВЛЕНО: URL с API_URL
   const handleTopicFileUpload = async (topicId, fileList) => {
     if (!fileList || fileList.length === 0) {
       alert('Выберите файл');
@@ -188,25 +201,29 @@ export default function AdminCourses() {
       const newFile = {
         id: uploaded.id,
         name: uploaded.file_name || uploaded.name || fileList[0].name,
-        url: uploaded.file_path?.startsWith('http') 
-          ? uploaded.file_path 
-          : `http://localhost:5000${uploaded.file_path || uploaded.url || ''}`,
+        // 🔥 ИСПРАВЛЕНО: используем API_URL вместо localhost
+        url: uploaded.file_path 
+          ? (uploaded.file_path.startsWith('http') 
+              ? uploaded.file_path 
+              : `${API_URL}${uploaded.file_path}`)
+          : (uploaded.url?.startsWith('http') 
+              ? uploaded.url 
+              : `${API_URL}${uploaded.url || ''}`),
         size: uploaded.file_size || uploaded.size || fileList[0].size
       };
       
-      // Обновляем состояние и перезагружаем данные
       setTopicFiles(prev => ({
         ...prev,
         [topicId]: [...(prev[topicId] || []), newFile]
       }));
-      await fetchCourses(); // Перезагружаем для синхронизации
+      await fetchCourses();
     } catch (err) {
       console.error('Ошибка загрузки:', err);
       alert('Не удалось загрузить файл: ' + (err.response?.data?.error || err.message));
     }
   };
 
-  // 🔥 ИСПРАВЛЕНА: Загрузка файла в задание — файлы больше не исчезают
+  // 🔥 Загрузка файла в задание — ИСПРАВЛЕНО: URL с API_URL
   const handleAssignFileUpload = async (assignId, fileList) => {
     if (!fileList || fileList.length === 0) {
       alert('Выберите файл');
@@ -223,18 +240,22 @@ export default function AdminCourses() {
       const newFile = {
         id: uploaded.id,
         name: uploaded.file_name || uploaded.name || fileList[0].name,
-        url: uploaded.file_path?.startsWith('http') 
-          ? uploaded.file_path 
-          : `http://localhost:5000${uploaded.file_path || uploaded.url || ''}`,
+        // 🔥 ИСПРАВЛЕНО: используем API_URL вместо localhost
+        url: uploaded.file_path 
+          ? (uploaded.file_path.startsWith('http') 
+              ? uploaded.file_path 
+              : `${API_URL}${uploaded.file_path}`)
+          : (uploaded.url?.startsWith('http') 
+              ? uploaded.url 
+              : `${API_URL}${uploaded.url || ''}`),
         size: uploaded.file_size || uploaded.size || fileList[0].size
       };
       
-      // Обновляем состояние и перезагружаем данные
       setAssignFiles(prev => ({
         ...prev,
         [assignId]: [...(prev[assignId] || []), newFile]
       }));
-      await fetchCourses(); // Перезагружаем для синхронизации
+      await fetchCourses();
     } catch (err) {
       console.error('Ошибка загрузки:', err);
       alert('Не удалось загрузить файл: ' + (err.response?.data?.error || err.message));
@@ -284,7 +305,7 @@ export default function AdminCourses() {
 
       {courses.map(course => (
         <div key={course.id} className="card mb-3 shadow-sm" style={{ overflow: 'hidden' }}>
-          {/* Курс: Заголовок + Кнопки — ИСПРАВЛЕНО: темный фон, белый текст */}
+          {/* Курс: Заголовок + Кнопки — темный фон, белый текст */}
           <div className="card-header d-flex flex-wrap align-items-center gap-2 py-2" style={{ background: '#486188', color: 'white' }}>
             <h5 className="mb-0 flex-grow-1 text-truncate" style={{ minWidth: 0, fontSize: '1rem', color: 'white' }}>
               <i className="bi bi-journal me-2"></i> {course.title}
@@ -332,7 +353,7 @@ export default function AdminCourses() {
                       </div>
                     </div>
 
-                    {/* Файлы темы — РАСШИРЕНО: все форматы */}
+                    {/* Файлы темы */}
                     <div className="ps-3 mb-2">
                       {topicFiles[topic.id]?.slice(0, 3).map(file => (
                         <div key={file.id} className="d-flex justify-content-between align-items-center py-1 small">
@@ -366,7 +387,6 @@ export default function AdminCourses() {
                             <button className="btn btn-sm btn-outline-danger" onClick={() => handleDeleteLesson(lesson.id)}>
                               <i className="bi bi-trash"></i>
                             </button>
-                            {/* ИСПРАВЛЕНО: Кнопка добавления задания */}
                             <button className="btn btn-sm btn-info text-white" onClick={() => { setAssignForm({ title: '', description: '', max_score: 100, deadline: '', lesson_id: lesson.id, id: null }); setShowAssignModal(true); }}>
                               <i className="bi bi-clipboard-check"></i> Задание
                             </button>
@@ -390,7 +410,7 @@ export default function AdminCourses() {
                               </div>
                             </div>
                             
-                            {/* Файлы задания — РАСШИРЕНО: все форматы */}
+                            {/* Файлы задания */}
                             {assignFiles[assign.id]?.slice(0, 2).map(file => (
                               <div key={file.id} className="d-flex justify-content-between align-items-center py-1 ps-3 small">
                                 <a href={file.url} target="_blank" rel="noreferrer" className="text-decoration-none text-muted text-truncate me-2" style={{ maxWidth: '70%' }}>
