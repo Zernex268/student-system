@@ -236,16 +236,16 @@ export default function AdminCourses() {
 
       {courses.map(course => (
         <div key={course.id} className="card mb-3 shadow-sm" style={{ overflow: 'hidden' }}>
-          {/* Курс: Заголовок + Кнопки */}
-          <div className="card-header d-flex flex-wrap align-items-center gap-2 py-2" style={{ background: '#f8f9fa' }}>
-            <h5 className="mb-0 flex-grow-1 text-truncate" style={{ minWidth: 0, fontSize: '1rem' }}>
-              <i className="bi bi-journal me-2 text-primary"></i> {course.title}
+          {/* Курс: Заголовок + Кнопки — ИСПРАВЛЕНО: темный фон, белый текст */}
+          <div className="card-header d-flex flex-wrap align-items-center gap-2 py-2" style={{ background: '#486188', color: 'white' }}>
+            <h5 className="mb-0 flex-grow-1 text-truncate" style={{ minWidth: 0, fontSize: '1rem', color: 'white' }}>
+              <i className="bi bi-journal me-2"></i> {course.title}
             </h5>
             <div className="d-flex gap-1 flex-shrink-0">
-              <button className="btn btn-sm btn-outline-secondary" onClick={() => { setCourseForm({ title: course.title, description: course.description, id: course.id }); setShowCourseModal(true); }}>
+              <button className="btn btn-sm btn-light" onClick={() => { setCourseForm({ title: course.title, description: course.description, id: course.id }); setShowCourseModal(true); }}>
                 <i className="bi bi-pencil"></i>
               </button>
-              <button className="btn btn-sm btn-outline-danger" onClick={() => handleDeleteCourse(course.id)}>
+              <button className="btn btn-sm btn-light text-danger" onClick={() => handleDeleteCourse(course.id)}>
                 <i className="bi bi-trash"></i>
               </button>
             </div>
@@ -279,12 +279,12 @@ export default function AdminCourses() {
                           <i className="bi bi-trash"></i>
                         </button>
                         <button className="btn btn-sm btn-success" onClick={() => { setLessonForm({ title: '', content: '', order_index: 0, topic_id: topic.id, id: null }); setShowLessonModal(true); }}>
-                          <i className="bi bi-play-circle"></i>
+                          <i className="bi bi-play-circle"></i> Урок
                         </button>
                       </div>
                     </div>
 
-                    {/* Файлы темы */}
+                    {/* Файлы темы — РАСШИРЕНО: все форматы */}
                     <div className="ps-3 mb-2">
                       {topicFiles[topic.id]?.slice(0, 2).map(file => (
                         <div key={file.id} className="d-flex justify-content-between align-items-center py-1 small">
@@ -296,7 +296,12 @@ export default function AdminCourses() {
                           </button>
                         </div>
                       ))}
-                      <FileUpload onUpload={(files) => handleTopicFileUpload(topic.id, files)} label="+ Файл" accept=".pdf,.doc" maxSize={50} />
+                      <FileUpload 
+                        onUpload={(files) => handleTopicFileUpload(topic.id, files)} 
+                        label="+ Файл" 
+                        accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.ppt,.pptx,.txt,.zip,.rar" 
+                        maxSize={100} 
+                      />
                     </div>
 
                     {/* Уроки */}
@@ -313,15 +318,16 @@ export default function AdminCourses() {
                             <button className="btn btn-sm btn-outline-danger" onClick={() => handleDeleteLesson(lesson.id)}>
                               <i className="bi bi-trash"></i>
                             </button>
+                            {/* ИСПРАВЛЕНО: Кнопка добавления задания */}
                             <button className="btn btn-sm btn-info text-white" onClick={() => { setAssignForm({ title: '', description: '', max_score: 100, deadline: '', lesson_id: lesson.id, id: null }); setShowAssignModal(true); }}>
-                              <i className="bi bi-clipboard-check"></i>
+                              <i className="bi bi-clipboard-check"></i> Задание
                             </button>
                           </div>
                         </div>
 
                         {/* Задания */}
                         {assignments[lesson.id]?.map(assign => (
-                          <div key={assign.id} className="ms-3 ps-2 border-start" style={{ borderColor: '#dee2e6' }}>
+                          <div key={assign.id} className="ms-3 ps-2 border-start mb-2" style={{ borderColor: '#dee2e6' }}>
                             <div className="d-flex flex-wrap align-items-center gap-1 mb-1">
                               <span className="flex-grow-1 fw-bold text-break small" style={{ minWidth: 0 }}>
                                 <i className="bi bi-list-task me-1 text-info"></i> {assign.title}
@@ -336,7 +342,7 @@ export default function AdminCourses() {
                               </div>
                             </div>
                             
-                            {/* Файлы задания */}
+                            {/* Файлы задания — РАСШИРЕНО: все форматы */}
                             {assignFiles[assign.id]?.slice(0, 1).map(file => (
                               <div key={file.id} className="d-flex justify-content-between align-items-center py-1 ps-3 small">
                                 <a href={file.url} target="_blank" rel="noreferrer" className="text-decoration-none text-muted text-truncate me-2" style={{ maxWidth: '70%' }}>
@@ -347,6 +353,12 @@ export default function AdminCourses() {
                                 </button>
                               </div>
                             ))}
+                            <FileUpload 
+                              onUpload={(files) => handleAssignFileUpload(assign.id, files)} 
+                              label="+ Материал" 
+                              accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.ppt,.pptx,.txt,.zip,.rar,.mp4,.mp3" 
+                              maxSize={100} 
+                            />
                           </div>
                         ))}
                       </div>
