@@ -48,9 +48,11 @@ export default function AdminCourses() {
             const tfRes = await axios.get(`/api/topics/${topic.id}/files`);
             topicFilesMap[topic.id] = (tfRes.data || []).map(f => ({
               id: f.id,
-              name: f.file_name || f.name,
-              url: f.file_path?.startsWith('http') ? f.file_path : `http://localhost:5000${f.file_path || f.url}`,
-              size: f.file_size || f.size
+              name: f.file_name || f.name || 'Без названия',
+              url: f.file_path?.startsWith('http') 
+                ? f.file_path 
+                : `http://localhost:5000${f.file_path || f.url || ''}`,
+              size: f.file_size || f.size || 0
             }));
           } catch (err) { topicFilesMap[topic.id] = []; }
 
@@ -66,9 +68,11 @@ export default function AdminCourses() {
                 const afRes = await axios.get(`/api/assignments/${assign.id}/files`);
                 assignFilesMap[assign.id] = (afRes.data || []).map(f => ({
                   id: f.id,
-                  name: f.file_name || f.name,
-                  url: f.file_path?.startsWith('http') ? f.file_path : `http://localhost:5000${f.file_path || f.url}`,
-                  size: f.file_size || f.size
+                  name: f.file_name || f.name || 'Без названия',
+                  url: f.file_path?.startsWith('http') 
+                    ? f.file_path 
+                    : `http://localhost:5000${f.file_path || f.url || ''}`,
+                  size: f.file_size || f.size || 0
                 }));
               } catch (err) { assignFilesMap[assign.id] = []; }
             }
@@ -80,7 +84,7 @@ export default function AdminCourses() {
       setAssignments(assignMap);
       setTopicFiles(topicFilesMap);
       setAssignFiles(assignFilesMap);
-    } catch (err) { console.error(err); }
+    } catch (err) { console.error('Ошибка загрузки курсов:', err); }
   };
 
   const fetchStudents = async () => {
@@ -167,45 +171,89 @@ export default function AdminCourses() {
     } catch (err) { console.error(err); }
   };
 
+  // 🔥 ИСПРАВЛЕНА: Загрузка файла в тему — файлы больше не исчезают
   const handleTopicFileUpload = async (topicId, fileList) => {
-    if (!fileList?.length) return;
-    const formData = new FormData();
-    formData.append('file', fileList[0]);
-    const res = await axios.post(`/api/topics/${topicId}/files`, formData, { headers: { 'Content-Type': 'multipart/form-data' }});
-    const file = res.data;
-    setTopicFiles(prev => ({
-      ...prev,
-      [topicId]: [...(prev[topicId] || []), {
-        id: file.id, name: file.file_name,
-        url: file.file_path?.startsWith('http') ? file.file_path : `http://localhost:5000${file.file_path}`,
-        size: file.file_size
-      }]
-    }));
+    if (!fileList || fileList.length === 0) {
+      alert('Выберите файл');
+      return;
+    }
+    try {
+      const formData = new FormData();
+      formData.append('file', fileList[0]);
+      const res = await axios.post(`/api/topics/${topicId}/files`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      const uploaded = res.data;
+      const newFile = {
+        id: uploaded.id,
+        name: uploaded.file_name || uploaded.name || fileList[0].name,
+        url: uploaded.file_path?.startsWith('http') 
+          ? uploaded.file_path 
+          : `http://localhost:5000${uploaded.file_path || uploaded.url || ''}`,
+        size: uploaded.file_size || uploaded.size || fileList[0].size
+      };
+      
+      // Обновляем состояние и перезагружаем данные
+      setTopicFiles(prev => ({
+        ...prev,
+        [topicId]: [...(prev[topicId] || []), newFile]
+      }));
+      await fetchCourses(); // Перезагружаем для синхронизации
+    } catch (err) {
+      console.error('Ошибка загрузки:', err);
+      alert('Не удалось загрузить файл: ' + (err.response?.data?.error || err.message));
+    }
   };
 
+  // 🔥 ИСПРАВЛЕНА: Загрузка файла в задание — файлы больше не исчезают
   const handleAssignFileUpload = async (assignId, fileList) => {
-    if (!fileList?.length) return;
-    const formData = new FormData();
-    formData.append('file', fileList[0]);
-    const res = await axios.post(`/api/assignments/${assignId}/files`, formData, { headers: { 'Content-Type': 'multipart/form-data' }});
-    const file = res.data;
-    setAssignFiles(prev => ({
-      ...prev,
-      [assignId]: [...(prev[assignId] || []), {
-        id: file.id, name: file.file_name,
-        url: file.file_path?.startsWith('http') ? file.file_path : `http://localhost:5000${file.file_path}`,
-        size: file.file_size
-      }]
-    }));
+    if (!fileList || fileList.length === 0) {
+      alert('Выберите файл');
+      return;
+    }
+    try {
+      const formData = new FormData();
+      formData.append('file', fileList[0]);
+      const res = await axios.post(`/api/assignments/${assignId}/files`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      const uploaded = res.data;
+      const newFile = {
+        id: uploaded.id,
+        name: uploaded.file_name || uploaded.name || fileList[0].name,
+        url: uploaded.file_path?.startsWith('http') 
+          ? uploaded.file_path 
+          : `http://localhost:5000${uploaded.file_path || uploaded.url || ''}`,
+        size: uploaded.file_size || uploaded.size || fileList[0].size
+      };
+      
+      // Обновляем состояние и перезагружаем данные
+      setAssignFiles(prev => ({
+        ...prev,
+        [assignId]: [...(prev[assignId] || []), newFile]
+      }));
+      await fetchCourses(); // Перезагружаем для синхронизации
+    } catch (err) {
+      console.error('Ошибка загрузки:', err);
+      alert('Не удалось загрузить файл: ' + (err.response?.data?.error || err.message));
+    }
   };
 
   const handleFileDelete = async (type, parentId, fileId) => {
     if (!window.confirm('Удалить файл?')) return;
-    await axios.delete(`/api/${type}/${parentId}/files/${fileId}`);
-    if (type === 'topics') {
-      setTopicFiles(prev => ({ ...prev, [parentId]: (prev[parentId] || []).filter(f => f.id !== fileId) }));
-    } else {
-      setAssignFiles(prev => ({ ...prev, [parentId]: (prev[parentId] || []).filter(f => f.id !== fileId) }));
+    try {
+      await axios.delete(`/api/${type}/${parentId}/files/${fileId}`);
+      if (type === 'topics') {
+        setTopicFiles(prev => ({ ...prev, [parentId]: (prev[parentId] || []).filter(f => f.id !== fileId) }));
+      } else {
+        setAssignFiles(prev => ({ ...prev, [parentId]: (prev[parentId] || []).filter(f => f.id !== fileId) }));
+      }
+      await fetchCourses();
+    } catch (err) {
+      console.error('Ошибка удаления:', err);
+      alert('Не удалось удалить файл');
     }
   };
 
@@ -286,7 +334,7 @@ export default function AdminCourses() {
 
                     {/* Файлы темы — РАСШИРЕНО: все форматы */}
                     <div className="ps-3 mb-2">
-                      {topicFiles[topic.id]?.slice(0, 2).map(file => (
+                      {topicFiles[topic.id]?.slice(0, 3).map(file => (
                         <div key={file.id} className="d-flex justify-content-between align-items-center py-1 small">
                           <a href={file.url} target="_blank" rel="noreferrer" className="text-decoration-none text-primary text-truncate me-2" style={{ maxWidth: '70%' }}>
                             <i className="bi bi-file-earmark me-1"></i> {file.name}
@@ -343,7 +391,7 @@ export default function AdminCourses() {
                             </div>
                             
                             {/* Файлы задания — РАСШИРЕНО: все форматы */}
-                            {assignFiles[assign.id]?.slice(0, 1).map(file => (
+                            {assignFiles[assign.id]?.slice(0, 2).map(file => (
                               <div key={file.id} className="d-flex justify-content-between align-items-center py-1 ps-3 small">
                                 <a href={file.url} target="_blank" rel="noreferrer" className="text-decoration-none text-muted text-truncate me-2" style={{ maxWidth: '70%' }}>
                                   <i className="bi bi-paperclip me-1"></i> {file.name}
